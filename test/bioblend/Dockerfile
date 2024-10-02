@@ -3,11 +3,11 @@ FROM quay.io/bgruening/galaxy
 USER galaxy
 WORKDIR /home/galaxy
 
-ENV TOX_ENV=py37 \
+ENV TOX_ENV=py310 \
     BIOBLEND_GALAXY_API_KEY=fakekey \
     BIOBLEND_GALAXY_URL=http://galaxy \
     BIOBLEND_TEST_JOB_TIMEOUT="240" \
-    GALAXY_VERSION=release_20.05
+    GALAXY_VERSION=release_24.1
 
 RUN mkdir bioblend-master \
     && curl -L -s https://github.com/galaxyproject/bioblend/archive/master.tar.gz | tar xzf - --strip-components=1 -C bioblend-master \

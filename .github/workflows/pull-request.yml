@@ -107,7 +107,7 @@ jobs:
         if: contains(matrix.infrastructure.exclude_test, matrix.test.name) != true
         run: echo ::set-output name=run::true
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set WORKFLOWS env for worfklows-test
         if: matrix.test.workflow
         run: echo "WORKFLOWS=${{ matrix.test.workflow }}" >> $GITHUB_ENV

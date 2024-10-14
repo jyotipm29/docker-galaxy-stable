@@ -4,7 +4,7 @@
 
 sleep 10 # ToDo: Use locking or so to be sure we really have the newest version
 echo "Waiting for Slurm config"
-until [ -f /etc/slurm-llnl/slurm.conf ] && echo Config found; do
+until [ -f /etc/slurm/slurm.conf ] && echo Config found; do
   sleep 0.5;
 done;
 

@@ -2,7 +2,7 @@ name: pr-test
 on: pull_request
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         infrastructure:
@@ -31,11 +31,12 @@ jobs:
               - workflow_example1
               - workflow_mapping_by_sequencing
               - workflow_ard
-          # - name: galaxy-pulsar-mq
-          #   files: -f docker-compose.yml -f docker-compose.pulsar.yml -f docker-compose.pulsar.mq.yml
-          #   exclude_test:
-          #     - workflow_example1
-          #     - workflow_mapping_by_sequencing
+          - name: galaxy-pulsar-mq
+            files: -f docker-compose.yml -f docker-compose.pulsar.yml -f docker-compose.pulsar.mq.yml
+            exclude_test:
+              - workflow_example1
+              - workflow_mapping_by_sequencing
+              - workflow_ard
           - name: galaxy-k8s
             files: -f docker-compose.yml -f docker-compose.k8s.yml
             exclude_test:
@@ -51,13 +52,13 @@ jobs:
               - workflow_ard
               - workflow_mapping_by_sequencing
               - selenium
-          # - name: galaxy-pulsar-mq-singularity
-          #   files: -f docker-compose.yml -f docker-compose.pulsar.yml -f docker-compose.pulsar.mq.yml -f docker-compose.singularity.yml
-          #   exclude_test:
-          #     - bioblend
-          #     - workflow_ard
-          #     - workflow_mapping_by_sequencing
-          #     - selenium
+          - name: galaxy-pulsar-mq-singularity
+            files: -f docker-compose.yml -f docker-compose.pulsar.yml -f docker-compose.pulsar.mq.yml -f docker-compose.singularity.yml
+            exclude_test:
+              - bioblend
+              - workflow_ard
+              - workflow_mapping_by_sequencing
+              - selenium
           - name: galaxy-slurm-singularity
             files: -f docker-compose.yml -f docker-compose.slurm.yml -f docker-compose.singularity.yml
             exclude_test:
@@ -164,7 +165,7 @@ jobs:
         if: failure()
         run: sudo chmod -R +r ./compose/export/galaxy/database
       - name: Save artifacts for debugging a failed test
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: ${{ matrix.infrastructure.name }}_${{ matrix.test.name }}_first-run
@@ -206,7 +207,7 @@ jobs:
         if: failure()
         run: sudo chmod -R +r ./compose/export/galaxy/database
       - name: Save artifacts for debugging a failed test
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         if: failure() && matrix.test.second_run == 'true'
         with:
           name: ${{ matrix.infrastructure.name }}_${{ matrix.test.name }}_second-run

@@ -1,35 +1,45 @@
-galaxy_uwsgi:
-  socket: :5555
-  buffer-size: 16384
-  processes: 1
-  threads: 4
-  offload-threads: 2
-  static-map: /static=static
-  static-map: /favicon.ico=static/favicon.ico
-  master: false
-  virtualenv: .venv
-  pythonpath: lib
-  thunder-lock: true
-  die-on-term: true
-  hook-master-start: unix_signal:2 gracefully_kill_them_all
-  hook-master-start: unix_signal:15 gracefully_kill_them_all
-  enable-threads: true
+gravity:
+  process_manager: supervisor
+  galaxy_root: /galaxy
+  virtualenv: /galaxy/.venv
+  gunicorn:
+    enable: True
+    bind: 0.0.0.0:5555
+    workers: 2
+  celery:
+    enable: true
+    enable_beat: true
+    concurrency: 2
+  handlers:
+    handler:
+      processes: 2
+      pools:
+        - job-handlers
+        - workflow-schedulers
 
 galaxy:
   tool_dependency_dir: /tool_deps
   tool_data_table_config_path: /cvmfs/data.galaxyproject.org/byhand/location/tool_data_table_conf.xml,/cvmfs/data.galaxyproject.org/managed/location/tool_data_table_conf.xml
+  enable_celery_tasks: true
+  celery_conf:
+    result_backend: redis://redis:6379/0
 
 pulsar:
   conda_auto_init: True
   conda_auto_install: True
   tool_dependency_dir: dependencies
-  dependency_resolvers_config_file: config/dependency_resolvers_conf.xml
+  dependency_resolution:
+    resolvers:
+      - type: conda
+        auto_init: true
+        auto_install: true
+      - type: conda
+        versionless: true
 
 # Probably needs more polishing, but at least it works..
 slurm:
-  ControlMachine: "slurmctld"
+  SlurmctldHost: "slurmctld"
   AuthType: "auth/munge"
-  CacheGroups: "0"
   CryptoType: "crypto/munge"
   MpiDefault: "none"
   ProctrackType: "proctrack/pgid"
@@ -49,13 +59,11 @@ slurm:
   SlurmctldTimeout: "120"
   SlurmdTimeout: "300"
   Waittime: "0"
-  FastSchedule: "1"
   SchedulerType: "sched/backfill"
-  SchedulerPort: "7321"
   SelectType: "select/cons_res"
   SelectTypeParameters: "CR_Core_Memory"
   AccountingStorageType: "accounting_storage/none"
-  AccountingStoreJobComment: "YES"
+  AccountingStoreFlags: "job_comment"
   ClusterName: "Cluster"
   JobCompType: "jobcomp/none"
   JobAcctGatherFrequency: "30"

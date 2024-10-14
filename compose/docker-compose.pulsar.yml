@@ -3,10 +3,9 @@
 # Galaxy will send all the needed files for Pulsar, and Pulsar
 # will handle the rest locally on its side.
 # This docker-compose file enables for Galaxy and Pulsar to
-# communicate over HTTP. To enable the MQ, concatinate the
+# communicate over HTTP. To enable the MQ, concatenate the
 # docker-compose.pulsar.mq.yml after this one.
 # Example: `docker-compose -f docker-compose.yml -f docker-compose.pulsar.yml up`
-version: "3.7"
 services:
   galaxy-configurator:
     environment:

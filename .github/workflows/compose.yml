@@ -10,9 +10,9 @@ jobs:
         id: image_tag
         run: |
           if [ "${GITHUB_REF#refs/heads/}" = "master" ]; then
-            echo "::set-output name=image_tag::latest";
+            echo "image_tag=latest" >> $GITHUB_OUTPUT;
           else
-            echo "::set-output name=image_tag::${GITHUB_REF#refs/heads/}"
+            echo "image_tag=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT;
           fi
       - name: Docker Login
         run: echo "${{ secrets.docker_registry_password }}" | docker login -u ${{ secrets.docker_registry_username }} --password-stdin ${{ secrets.docker_registry }}
@@ -20,7 +20,7 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
         with:
-          buildx-version: v0.17.1
+          version: v0.17.1
       - name: Run Buildx
         env:
           image_name: galaxy-container-base
@@ -46,9 +46,9 @@ jobs:
         id: image_tag
         run: |
           if [ "${GITHUB_REF#refs/heads/}" = "master" ]; then
-            echo "::set-output name=image_tag::latest";
+            echo "image_tag=latest" >> $GITHUB_OUTPUT;
           else
-            echo "::set-output name=image_tag::${GITHUB_REF#refs/heads/}"
+            echo "image_tag=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT;
           fi
       - name: Docker Login
         run: echo "${{ secrets.docker_registry_password }}" | docker login -u ${{ secrets.docker_registry_username }} --password-stdin ${{ secrets.docker_registry }}
@@ -56,7 +56,7 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
         with:
-          buildx-version: v0.17.1
+          version: v0.17.1
       - name: Run Buildx
         env:
           image_name: galaxy-cluster-base
@@ -100,9 +100,9 @@ jobs:
         id: image_tag
         run: |
           if [ "${GITHUB_REF#refs/heads/}" = "master" ]; then
-            echo "::set-output name=image_tag::latest";
+            echo "image_tag=latest" >> $GITHUB_OUTPUT;
           else
-            echo "::set-output name=image_tag::${GITHUB_REF#refs/heads/}"
+            echo "image_tag=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT;
           fi
       - name: Docker Login
         run: echo "${{ secrets.docker_registry_password }}" | docker login -u ${{ secrets.docker_registry_username }} --password-stdin ${{ secrets.docker_registry }}
@@ -110,7 +110,7 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
         with:
-          buildx-version: v0.17.1
+          version: v0.17.1
       - name: Run Buildx
         run: |
           for i in {1..4}; do
@@ -229,7 +229,7 @@ jobs:
       - name: Check if test should be run
         id: run_check
         if: contains(matrix.infrastructure.exclude_test, matrix.test.name) != true
-        run: echo ::set-output name=run::true
+        run: echo "run=true" >> $GITHUB_OUTPUT
       - name: Checkout
         uses: actions/checkout@v4
       - name: Set image tag in env
@@ -240,6 +240,9 @@ jobs:
       - name: Set WORKFLOWS env for worfklows-test
         if: matrix.test.workflow
         run: echo "WORKFLOWS=${{ matrix.test.workflow }}" >> $GITHUB_ENV
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update -qq && sudo apt-get install docker-compose -y
       - name: Run tests for the first time
         if: steps.run_check.outputs.run
         run: |

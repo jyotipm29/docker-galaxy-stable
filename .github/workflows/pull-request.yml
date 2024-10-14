@@ -106,7 +106,7 @@ jobs:
       - name: Check if test should be run
         id: run_check
         if: contains(matrix.infrastructure.exclude_test, matrix.test.name) != true
-        run: echo ::set-output name=run::true
+        run: echo "run=true" >> $GITHUB_OUTPUT
       - name: Checkout
         uses: actions/checkout@v4
       - name: Set WORKFLOWS env for worfklows-test
@@ -130,6 +130,9 @@ jobs:
             --build-arg IMAGE_TAG=ci-testing \
             $image_name
         working-directory: ./compose/base-images
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update -qq && sudo apt-get install docker-compose -y
       - name: Run tests for the first time
         if: steps.run_check.outputs.run
         run: |

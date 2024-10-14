@@ -7,9 +7,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-      sparse-checkout: |
-        .github
-        compose
+        sparse-checkout: |
+          .github
+          compose
     - name: Run shellcheck with reviewdog
       uses: reviewdog/action-shellcheck@v1.27.0
       with:

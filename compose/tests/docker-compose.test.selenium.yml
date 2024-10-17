@@ -5,6 +5,7 @@ services:
     environment:
       - TESTS=${TESTS:-navigates_galaxy.py,login.py}
       - GALAXY_URL=http://nginx${GALAXY_PROXY_PREFIX:-}
+      - SE_ENABLE_TRACING=false
     volumes:
       - ${EXPORT_DIR:-./../export}/galaxy/database:/galaxy/database
     networks:

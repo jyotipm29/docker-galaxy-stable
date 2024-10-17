@@ -7,7 +7,7 @@ ENV GALAXY_ROOT_DIR=/galaxy
 ENV GALAXY_PYTHON=/usr/bin/python3
 
 USER root
-RUN apt update && apt install --no-install-recommends python3-dev python3-pip -y && rm -rf /var/lib/apt/lists/* \
+RUN apt update && apt install --no-install-recommends python3-dev python3-pip libpq-dev 2to3 -y && rm -rf /var/lib/apt/lists/* \
     && mkdir "${GALAXY_ROOT_DIR}" \
     && chown seluser "${GALAXY_ROOT_DIR}"
 

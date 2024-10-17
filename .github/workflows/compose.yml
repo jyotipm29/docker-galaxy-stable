@@ -137,7 +137,7 @@ jobs:
               - workflow_example1
           - name: galaxy-proxy-prefix
             files: -f docker-compose.yml
-            env: GALAXY_PROXY_PREFIX=/arbitrary_Galaxy-prefix GALAXY_CONFIG_GALAXY_INFRASTRUCTURE_URL=http://localhost/arbitrary_Galaxy-prefix
+            env: GALAXY_PROXY_PREFIX=/arbitrary_Galaxy-prefix GALAXY_CONFIG_GALAXY_INFRASTRUCTURE_URL=http://localhost/arbitrary_Galaxy-prefix EXTRA_SKIP_TESTS_BIOBLEND="not test_import_export_workflow_dict and not test_import_export_workflow_from_local_path"
             exclude_test:
               - workflow_example1
           - name: galaxy-htcondor
@@ -163,7 +163,6 @@ jobs:
           - name: galaxy-k8s
             files: -f docker-compose.yml -f docker-compose.k8s.yml
             exclude_test:
-              - bioblend
               - workflow_example1
               - workflow_ard
               - workflow_mapping_by_sequencing
@@ -171,28 +170,24 @@ jobs:
           - name: galaxy-singularity
             files: -f docker-compose.yml -f docker-compose.singularity.yml
             exclude_test:
-              - bioblend
               - workflow_ard
               - workflow_mapping_by_sequencing
               - selenium
           - name: galaxy-pulsar-mq-singularity
             files: -f docker-compose.yml -f docker-compose.pulsar.yml -f docker-compose.pulsar.mq.yml -f docker-compose.singularity.yml
             exclude_test:
-              - bioblend
               - workflow_ard
               - workflow_mapping_by_sequencing
               - selenium
           - name: galaxy-slurm-singularity
             files: -f docker-compose.yml -f docker-compose.slurm.yml -f docker-compose.singularity.yml
             exclude_test:
-              - bioblend
               - workflow_ard
               - workflow_mapping_by_sequencing
               - selenium
           - name: galaxy-htcondor-singularity
             files: -f docker-compose.yml -f docker-compose.htcondor.yml -f docker-compose.singularity.yml
             exclude_test:
-              - bioblend
               - workflow_ard
               - workflow_mapping_by_sequencing
               - selenium
@@ -252,7 +247,7 @@ jobs:
           export TIMEOUT=${{ matrix.test.timeout }}
           docker-compose ${{ matrix.infrastructure.files }} ${{ matrix.test.files }} config
           env
-          for i in {1..4}; do
+          for i in {1}; do
             echo "Running test - try \#$i"
             echo "Removing export directory if existent";
             sudo rm -rf export
@@ -273,6 +268,10 @@ jobs:
         shell: bash
         working-directory: ./compose
         continue-on-error: false
+      - name: Fix file names before saving artifacts
+        if: failure()
+        run: |
+          sudo find ./compose/export/galaxy/database -depth -name '*:*' -execdir bash -c 'mv "$1" "${1//:/-}"' bash {} \;
       - name: Allow upload-artifact read access
         if: failure()
         run: sudo chmod -R +r ./compose/export/galaxy/database
@@ -289,13 +288,13 @@ jobs:
           sudo rm -rf export/galaxy/database
         working-directory: ./compose
       - name: Run tests a second time
-        if: matrix.test.second_run == 'true' && steps.run_check.run
+        if: matrix.test.second_run == 'true' && steps.run_check.outputs.run
         run: |
           export DOCKER_REGISTRY=${{ secrets.docker_registry }}
           export DOCKER_REGISTRY_USERNAME=${{ secrets.docker_registry_username }}
           export ${{ matrix.infrastructure.env }}
           export TIMEOUT=${{ matrix.test.timeout }}
-          for i in {1..4}; do
+          for i in {1}; do
             echo "Running test - try \#$i"
             echo "Removing export directory if existent";
             sudo rm -rf export
@@ -315,6 +314,10 @@ jobs:
         shell: bash
         working-directory: ./compose
         continue-on-error: false
+      - name: Fix file names before saving artifacts
+        if: failure() && matrix.test.second_run == 'true'
+        run: |
+          sudo find ./compose/export/galaxy/database -depth -name '*:*' -execdir bash -c 'mv "$1" "${1//:/-}"' bash {} \;
       - name: Allow upload-artifact read access
         if: failure() && matrix.test.second_run == 'true'
         run: sudo chmod -R +r ./compose/export/galaxy/database

@@ -6,10 +6,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        sparse-checkout: |
-          .github
-          compose
+    # - name: Cleanup to only use compose
+    #   run: rm -R docs galaxy test
     - name: Run shellcheck with reviewdog
       uses: reviewdog/action-shellcheck@v1.27.0
       with:

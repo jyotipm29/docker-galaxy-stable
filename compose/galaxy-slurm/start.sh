@@ -10,7 +10,8 @@ done;
 
 if [ "$1" = "slurmctld" ]; then
   if [ ! -f /etc/munge/munge.key ]; then
-    gosu "$MUNGE_USER" /usr/sbin/create-munge-key
+    chown -R "$MUNGE_USER":"$MUNGE_USER" /etc/munge
+    gosu "$MUNGE_USER" /usr/sbin/mungekey
   fi
   echo "Starting Munge.."
   /etc/init.d/munge start

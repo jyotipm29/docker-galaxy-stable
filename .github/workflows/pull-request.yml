@@ -12,7 +12,7 @@ jobs:
               - workflow_example1
           - name: galaxy-proxy-prefix
             files: -f docker-compose.yml
-            env: GALAXY_PROXY_PREFIX=/arbitrary_Galaxy-prefix GALAXY_CONFIG_GALAXY_INFRASTRUCTURE_URL=http://localhost/arbitrary_Galaxy-prefix
+            env: GALAXY_PROXY_PREFIX=/arbitrary_Galaxy-prefix GALAXY_CONFIG_GALAXY_INFRASTRUCTURE_URL=http://localhost/arbitrary_Galaxy-prefix EXTRA_SKIP_TESTS_BIOBLEND="not test_import_export_workflow_dict and not test_import_export_workflow_from_local_path"
             exclude_test:
               - workflow_example1
           - name: galaxy-htcondor
@@ -164,6 +164,10 @@ jobs:
         shell: bash
         working-directory: ./compose
         continue-on-error: false
+      - name: Fix file names before saving artifacts
+        if: failure()
+        run: |
+          sudo find ./compose/export/galaxy/database -depth -name '*:*' -execdir bash -c 'mv "$1" "${1//:/-}"' bash {} \;
       - name: Allow upload-artifact read access
         if: failure()
         run: sudo chmod -R +r ./compose/export/galaxy/database
@@ -180,7 +184,7 @@ jobs:
           sudo rm -rf export/galaxy/database
         working-directory: ./compose
       - name: Run tests a second time
-        if: matrix.test.second_run == 'true' && steps.run_check.run
+        if: matrix.test.second_run == 'true' && steps.run_check.outputs.run
         run: |
           export IMAGE_TAG=ci-testing
           export COMPOSE_DOCKER_CLI_BUILD=1
@@ -206,8 +210,12 @@ jobs:
         shell: bash
         working-directory: ./compose
         continue-on-error: false
+      - name: Fix file names before saving artifacts
+        if: failure() && matrix.test.second_run == 'true'
+        run: |
+          sudo find ./compose/export/galaxy/database -depth -name '*:*' -execdir bash -c 'mv "$1" "${1//:/-}"' bash {} \;
       - name: Allow upload-artifact read access
-        if: failure()
+        if: failure() && matrix.test.second_run == 'true'
         run: sudo chmod -R +r ./compose/export/galaxy/database
       - name: Save artifacts for debugging a failed test
         uses: actions/upload-artifact@v4

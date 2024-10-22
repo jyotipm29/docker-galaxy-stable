@@ -5,5 +5,6 @@ services:
     environment:
       - GALAXY_VERSION=${GALAXY_VERSION:-release_24.1} # TODO: Change to GALAXY_RELEASE
       - GALAXY_URL=http://nginx${GALAXY_PROXY_PREFIX:-}
+      - EXTRA_SKIP_TESTS_BIOBLEND=${EXTRA_SKIP_TESTS_BIOBLEND:-}
     networks:
       - galaxy
